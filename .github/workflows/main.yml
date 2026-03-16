@@ -15,12 +15,13 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt update
-          sudo apt install -y build-essential git python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good
+          sudo apt install -y build-essential git python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good openjdk-17-jdk-headless
           pip install --upgrade pip
-          pip install "cython<3.0.0" buildozer # Pakai Cython di bawah versi 3 biar gak error
-          pip install pyTelegramBotAPI
+          pip install "cython<3.0.0" buildozer pyTelegramBotAPI
 
       - name: Build APK
         run: |
-          # Perintah sakti untuk bypass lisensi dan rakit
-          yes | buildozer android debug
+          # Perintah ini untuk membersihkan sisa error sebelumnya
+          buildozer android clean
+          # Rakit ulang dengan menyetujui lisensi secara otomatis
+          printf "y\ny\ny\ny\ny\ny\n" | buildozer android debug
