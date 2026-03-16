@@ -3,7 +3,7 @@ on: [push, workflow_dispatch]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04  # Kita turunkan ke Ubuntu 22 agar lebih stabil
     steps:
       - uses: actions/checkout@v4
 
@@ -21,5 +21,8 @@ jobs:
 
       - name: Build APK
         run: |
-          # Langsung rakit tanpa perintah 'clean'
-          printf "y\ny\ny\ny\ny\ny\n" | buildozer android debug
+          # Paksa Buildozer download bahan yang pas
+          buildozer android debug
+        env:
+          APP_ANDROID_ACCEPT_SDK_LICENSE: "1"
+          # Paksa menggunakan NDK yang kita tulis di spec
