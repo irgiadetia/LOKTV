@@ -1,16 +1,25 @@
 name: Build APK
-on:
-  workflow_dispatch:
-  push:
-    branches: [ "main" ]
+on: [push, workflow_dispatch]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
 
-      - name: Build with Buildozer
-        uses: herberth-amaral/buildozer-action@master
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          command: buildozer android debug
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential git python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev
+          sudo apt-get install -y libgstreamer1.0-gstreamer-lite1.0-dev libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good
+          pip install --upgrade pip
+          pip install buildozer cython==0.29.33
+
+      - name: Build APK with Buildozer
+        run: |
+          yes | buildozer android debug
