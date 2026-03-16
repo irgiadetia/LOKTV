@@ -21,7 +21,5 @@ jobs:
 
       - name: Build APK
         run: |
-          # Perintah ini untuk membersihkan sisa error sebelumnya
-          buildozer android clean
-          # Rakit ulang dengan menyetujui lisensi secara otomatis
+          # Langsung rakit tanpa perintah 'clean'
           printf "y\ny\ny\ny\ny\ny\n" | buildozer android debug
