@@ -3,7 +3,7 @@ on: [push, workflow_dispatch]
 
 jobs:
   build:
-    runs-on: ubuntu-22.04  # Kita turunkan ke Ubuntu 22 agar lebih stabil
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
@@ -15,14 +15,14 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt update
-          sudo apt install -y build-essential git python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good openjdk-17-jdk-headless
+          sudo apt install -y build-essential git python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good openjdk-17-jdk-headless setools
           pip install --upgrade pip
           pip install "cython<3.0.0" buildozer pyTelegramBotAPI
 
       - name: Build APK
         run: |
-          # Paksa Buildozer download bahan yang pas
-          buildozer android debug
+          # Perintah sakti untuk bypass semua pertanyaan lisensi
+          yes | buildozer -v android debug
         env:
-          APP_ANDROID_ACCEPT_SDK_LICENSE: "1"
-          # Paksa menggunakan NDK yang kita tulis di spec
+          ACCEPT_SDK_LICENSE: "true"
+          ANDROID_SDK_HOME: "/home/runner/.android"
